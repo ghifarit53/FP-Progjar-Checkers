@@ -3,11 +3,12 @@ class Constants:
     HEIGHT = 800
     ROWS = 8
     COLS = 8
-    SQUARE_SIZE = WIDTH // COLS
+    SQUARE_SIZE = WIDTH // COLS         # Size of each square on the board
 
 class Colors:
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
-    DARK_BROWN = (101, 67, 33)
     LIGHT_BROWN = (210, 180, 140)
-    HIGHLIGHT = (255, 255, 0)
+    DARK_SQUARE = (101, 67, 33)
+    LIGHT_SQUARE = (245, 245, 245)  # Lighter color for the light squares
+    HIGHLIGHT = (255, 255, 0)  # Highlight color for pieces
