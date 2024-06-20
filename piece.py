@@ -12,20 +12,18 @@ class Piece:
         self.king = False  # Initially, the piece is not a king
         self.x = 0
         self.y = 0
-        self.calc_position()
 
-    def calc_position(self):
-        # Calculate the (x, y) position of the piece based on its row and column
-        self.x = Constants.SQUARE_SIZE * self.col + Constants.SQUARE_SIZE // 2
-        self.y = Constants.SQUARE_SIZE * self.row + Constants.SQUARE_SIZE // 2
+    def calculate_position(self, square_size):
+        self.x = self.col * square_size + square_size // 2
+        self.y = self.row * square_size + square_size // 2
 
     def make_king(self):
         # Promote the piece to a king
         self.king = True
 
-    def draw(self, surface):
-        # Draw the piece on the board
-        radius = Constants.SQUARE_SIZE // 2 - self.PADDING
+    def draw(self, surface, square_size):
+        self.calculate_position(square_size)
+        radius = max(square_size // 2 - self.PADDING, 8)
         pygame.draw.circle(surface, Colors.HIGHLIGHT, (self.x, self.y), radius + self.OUTLINE)  # Draw the outline
         pygame.draw.circle(surface, self.color, (self.x, self.y), radius)  # Draw the piece
         if self.king:
