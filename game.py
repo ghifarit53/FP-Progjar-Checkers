@@ -1,6 +1,5 @@
 import pygame
 from constants import Constants, Colors
-from board import Board
 
 def play_vs_player(board, pos):
     if board.handle_click(pos):
@@ -8,8 +7,6 @@ def play_vs_player(board, pos):
     return False
 
 def play_vs_ai(board):
-    # Placeholder AI logic for demonstration
-    # Randomly select a piece and make a valid move
     import random
     valid_pieces = []
     for row in range(Constants.ROWS):

@@ -19,6 +19,12 @@ def main():
     game_mode = None
     turn = "player1"  # Initialize turn tracker
 
+    # Set initial turn based on game mode
+    if game_mode == "pvai":
+        turn = "player1"  # Player 1 starts first against AI
+    elif game_mode == "pvp":
+        turn = "player1"  # Player 1 starts first in player vs player mode
+
     while running:
         clock.tick(60)
 
@@ -42,10 +48,11 @@ def main():
                     if pvp_button.collidepoint(pos):
                         menu_active = False
                         game_mode = "pvp"
+                        turn = "player1"  # Set turn to player 1
                     elif pvai_button.collidepoint(pos):
                         menu_active = False
                         game_mode = "pvai"
-                        turn = "player1"  # Start with player 1's turn against AI
+                        turn = "player1"  # Set turn to player 1
 
         if not menu_active:
             surface.fill(Colors.BLACK)

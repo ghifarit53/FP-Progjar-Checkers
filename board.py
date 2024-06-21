@@ -76,7 +76,7 @@ class Board:
             piece = self.board[row][col]
             if piece != 0:
                 self.selected_piece = (row, col)
-                self.valid_moves = piece.get_valid_moves(self.board)
+                self.valid_moves = piece.get_valid_moves(self.board)  # Calculate valid moves for the selected piece
         return False
 
     def move_piece(self, start_pos, end_pos):
@@ -86,5 +86,4 @@ class Board:
         self.board[end_row][end_col] = self.board[start_row][start_col]
         self.board[start_row][start_col] = 0
         # Update piece position
-        self.board[end_row][end_col].row = end_row
-        self.board[end_row][end_col].col = end_col
+        self.board[end_row][end_col].move(end_row, end_col)
