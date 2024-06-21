@@ -4,8 +4,8 @@ from constants import Constants, Colors
 def draw_menu(surface, font):
     surface.fill(Colors.BLACK)  # Matrix theme
 
-    # Example menu options (customize as needed)
-    title_text = font.render("Checkers 101", True, Colors.GREEN)
+    # Menu options (customize as needed, please)
+    title_text = font.render("Checkers 101", True, Colors.LIGHT)
     title_rect = title_text.get_rect(center=(Constants.WIDTH // 2, Constants.HEIGHT // 4))
     surface.blit(title_text, title_rect)
 

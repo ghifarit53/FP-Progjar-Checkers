@@ -16,9 +16,9 @@ class Board:
             for col in range(Constants.COLS):
                 if (row + col) % 2 == 1:
                     if row < 3:
-                        self.board[row].append(Piece(row, col, Colors.GREEN))  # Add light colored pieces
+                        self.board[row].append(Piece(row, col, Colors.GREEN))  # Add light pieces
                     elif row > 4:
-                        self.board[row].append(Piece(row, col, Colors.BLACK))  # Add black pieces
+                        self.board[row].append(Piece(row, col, Colors.BLACK))  # Add dark pieces
                     else:
                         self.board[row].append(0)  # Empty square
                 else:
@@ -30,7 +30,7 @@ class Board:
         # Calculate square size based on surface dimensions
         square_size = min(width // Constants.COLS, height // Constants.ROWS)
 
-        # Fill the surface with the bg color
+        # Fill the surface with the background color
         surface.fill(Colors.BLACK)
 
         # Draw the squares on the board

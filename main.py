@@ -1,14 +1,29 @@
 import pygame
 import os  # To handle file paths
+import random
 from constants import Constants, Colors
 from board import Board
 from menu import draw_menu
-from game import play_vs_player, play_vs_ai
+
+# AI function to get a random move
+def get_ai_move(board):
+    moves = []
+    # Count possible moves based on rows
+    for row in range(Constants.ROWS):
+        for col in range(Constants.COLS):
+            piece = board.board[row][col]
+            if piece != 0 and piece.color == Colors.BLACK:
+                valid_moves = board.get_valid_moves(piece)
+                for move in valid_moves:
+                    moves.append((piece, move))
+    if not moves:
+        return None
+    return random.choice(moves)
 
 def main():
     pygame.init()
     aspect_ratio = Constants.WIDTH / Constants.HEIGHT
-    min_width, min_height = 300, 300
+    min_width, min_height = 600, 600
     surface = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption('Checkers')
 
@@ -57,24 +72,28 @@ def main():
             board.draw(surface)
             pygame.display.flip()
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left mouse button
-                    pos = pygame.mouse.get_pos()
-                    if game_mode == "pvp":
-                        if turn == "player1":
-                            if play_vs_player(board, pos):
-                                turn = "player2"  # Switch to player 2's turn
-                        else:
-                            if play_vs_player(board, pos):
-                                turn = "player1"  # Switch to player 1's turn
-                    elif game_mode == "pvai":
-                        if turn == "player1":
-                            if play_vs_player(board, pos):
+            if game_mode == "pvp":
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left mouse button
+                        pos = pygame.mouse.get_pos()
+                        if board.handle_click(pos):
+                            turn = "player2" if turn == "player1" else "player1"  # Switch turns in player vs player mode
+
+            elif game_mode == "pvai":
+                if turn == "player1":
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:  # Left mouse button
+                            pos = pygame.mouse.get_pos()
+                            if board.handle_click(pos):
                                 turn = "ai"  # Switch to AI's turn
 
-                        elif turn == "ai":
-                            play_vs_ai(board)
-                            turn = "player1"  # Switch back to player 1's turn after AI move
+                elif turn == "ai":
+                    # Simulate AI move
+                    ai_move = get_ai_move(board)
+                    if ai_move:
+                        piece, move = ai_move
+                        board.move_piece(piece, move)
+                    turn = "player1"  # Switch back to player 1's turn after AI move
 
     pygame.quit()
 
