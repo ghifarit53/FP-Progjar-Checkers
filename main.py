@@ -1,7 +1,6 @@
 import pygame
 from constants import Constants, Colors
 from board import Board
-from game import handle_player_turn, handle_ai_turn
 from menu import draw_menu
 
 def main():
@@ -11,13 +10,12 @@ def main():
     surface = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption('Checkers')
 
-    font = pygame.font.Font(None, 74)
+    font = pygame.font.Font(None, 36)
     board = Board()
     clock = pygame.time.Clock()
     running = True
+    menu_active = True
     game_mode = None
-    ai_turn = False
-    player_turn = True
 
     while running:
         clock.tick(60)
@@ -33,34 +31,28 @@ def main():
                 else:
                     new_height = int(new_width / aspect_ratio)
                 surface = pygame.display.set_mode((new_width, new_height), pygame.RESIZABLE)
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if game_mode is None:
+            if menu_active:
+                draw_menu(surface, font)
+                if event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
-                    pvp_rect, pvai_rect = draw_menu(surface, font)
-                    if pvp_rect.collidepoint(pos):
+                    pvp_button = pygame.Rect(Constants.WIDTH // 4, Constants.HEIGHT // 2, Constants.WIDTH // 2, 50)
+                    pvai_button = pygame.Rect(Constants.WIDTH // 4, Constants.HEIGHT // 2 + 100, Constants.WIDTH // 2, 50)
+                    if pvp_button.collidepoint(pos):
+                        menu_active = False
                         game_mode = "pvp"
-                    elif pvai_rect.collidepoint(pos):
+                    elif pvai_button.collidepoint(pos):
+                        menu_active = False
                         game_mode = "pvai"
-                else:
-                    pos = pygame.mouse.get_pos()
-                    if game_mode == "pvp":
-                        player_turn = handle_player_turn(board, surface, player_turn)
-                    elif game_mode == "pvai":
-                        player_turn = handle_player_turn(board, surface, player_turn)
-                        if not player_turn:
-                            ai_turn = True
 
-        if game_mode is None:
-            draw_menu(surface, font)
-        else:
-            if game_mode == "pvai" and not player_turn and ai_turn:
-                ai_turn = handle_ai_turn(board, surface, ai_turn)
-                if not ai_turn:
-                    player_turn = True
-
+        if not menu_active:
+            surface.fill(Colors.BLACK)
             board.draw(surface)
+            pygame.display.flip()
 
-        pygame.display.flip()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse button
+                    pos = pygame.mouse.get_pos()
+                    board.handle_click(pos)
 
     pygame.quit()
 

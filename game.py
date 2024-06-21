@@ -7,7 +7,7 @@ def handle_player_turn(board, surface, player_turn):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 if board.handle_click(pos):
-                    return False  # ENd of Player turn
+                    return False  # End of Player turn
     return True
 
 def handle_ai_turn(board, surface, ai_turn):

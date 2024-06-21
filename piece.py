@@ -29,5 +29,20 @@ class Piece:
         if self.king:
             pygame.draw.circle(surface, Colors.WHITE, (self.x, self.y), radius // 2)  # Draw a smaller circle for kings
 
+    def get_valid_moves(self, board):
+        valid_moves = []
+
+        # Implement logic here to determine valid moves for the piece
+        # Example logic:
+        # Check diagonal moves (left and right)
+        # Example for single move (without capturing) to the right
+        if self.row + 1 < Constants.ROWS and self.col + 1 < Constants.COLS:
+            if board[self.row + 1][self.col + 1] == 0:  # Check if the square is empty
+                valid_moves.append((self.row + 1, self.col + 1))
+
+        # You should implement more comprehensive logic here for capturing moves and kings
+
+        return valid_moves
+
     def __repr__(self):
         return str(self.color)  # Return the color of the piece as its string representation
