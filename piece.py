@@ -1,6 +1,8 @@
 import pygame
 from constants import Constants, Colors
 
+GREEN = (0, 255, 0)  # Bright green color constant
+
 class Piece:
     PADDING = 15  # Padding around the piece
     OUTLINE = 2  # Outline thickness of the piece
@@ -24,8 +26,13 @@ class Piece:
     def draw(self, surface, square_size):
         self.calculate_position(square_size)
         radius = max(square_size // 2 - self.PADDING, 8)
-        pygame.draw.circle(surface, Colors.BLACK, (self.x, self.y), radius + self.OUTLINE)  # Draw the outline
-        pygame.draw.circle(surface, self.color, (self.x, self.y), radius)  # Draw the piece
+        
+        # Draw bright green outline
+        pygame.draw.circle(surface, GREEN, (self.x, self.y), radius + self.OUTLINE)
+        
+        # Draw the piece
+        pygame.draw.circle(surface, self.color, (self.x, self.y), radius)
+        
         if self.king:
             pygame.draw.circle(surface, Colors.WHITE, (self.x, self.y), radius // 2)  # Draw a smaller circle for kings
 

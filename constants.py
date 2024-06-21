@@ -8,9 +8,9 @@ class Constants:
 class Colors:
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
-    LIGHT_BROWN = (210, 180, 140)
-    DARK_SQUARE = (101, 67, 33)
-    LIGHT_SQUARE = (245, 245, 245)
+    LIGHT = (210, 180, 140)
+    LIGHT_SQUARE = (39, 62, 6, 180)
+    DARK_SQUARE = (46, 41, 58, 180)
     HIGHLIGHT = (255, 255, 0)
     MENU_BG = (0, 0, 0, 180)  # Transparent black for menu bg
     TEXT_COLOR = (0, 255, 0)  # Green text
