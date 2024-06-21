@@ -1,6 +1,6 @@
 class Constants:
-    WIDTH = 800
-    HEIGHT = 800
+    WIDTH = 600
+    HEIGHT = 600
     ROWS = 8
     COLS = 8
     SQUARE_SIZE = WIDTH // COLS         # Size of each square on the board

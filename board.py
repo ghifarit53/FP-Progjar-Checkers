@@ -22,25 +22,27 @@ class Board:
                 else:
                     self.board[row].append(0)  # Empty square
 
-    def draw_squares(self, surface):
-        # Draw the squares on the board
+    def draw(self, surface):
+        # Get the width and height of the surface
+        width, height = surface.get_size()
+        # Calculate square size based on surface dimensions
+        square_size = min(width // Constants.COLS, height // Constants.ROWS)
+
+        # Fill the surface with the background color
         surface.fill(Colors.BLACK)
+
+        # Draw the squares on the board
         for row in range(Constants.ROWS):
             for col in range(Constants.COLS):
+                rect = (col * square_size, row * square_size, square_size, square_size)
                 if (row + col) % 2 == 0:
-                    pygame.draw.rect(surface, Colors.LIGHT_SQUARE, 
-                                     (col * Constants.SQUARE_SIZE, row * Constants.SQUARE_SIZE, 
-                                      Constants.SQUARE_SIZE, Constants.SQUARE_SIZE))
+                    pygame.draw.rect(surface, Colors.LIGHT_SQUARE, rect)
                 else:
-                    pygame.draw.rect(surface, Colors.DARK_SQUARE, 
-                                     (col * Constants.SQUARE_SIZE, row * Constants.SQUARE_SIZE, 
-                                      Constants.SQUARE_SIZE, Constants.SQUARE_SIZE))
+                    pygame.draw.rect(surface, Colors.DARK_SQUARE, rect)
 
-    def draw(self, surface):
         # Draw the board and pieces
-        self.draw_squares(surface)
         for row in range(Constants.ROWS):
             for col in range(Constants.COLS):
                 piece = self.board[row][col]
                 if piece != 0:
-                    piece.draw(surface)
+                    piece.draw(surface, square_size)
