@@ -1,4 +1,5 @@
 import pygame
+import os  # To handle file paths
 from constants import Constants, Colors
 from board import Board
 from menu import draw_menu
@@ -11,7 +12,10 @@ def main():
     surface = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption('Checkers')
 
-    font = pygame.font.Font(None, 36)
+    # Load monospace font
+    font_path = os.path.join('assets', 'fonts', 'audiowide-mono', 'Audiowide-Mono-Latest.ttf')
+    font = pygame.font.Font(font_path, 23)  # Adjust size as needed
+
     board = Board()
     clock = pygame.time.Clock()
     running = True
