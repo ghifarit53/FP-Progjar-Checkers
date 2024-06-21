@@ -23,12 +23,6 @@ def main():
     game_mode = None
     turn = "player1"  # Initialize turn tracker
 
-    # Set initial turn based on game mode
-    if game_mode == "pvai":
-        turn = "player1"  # Player 1 starts first against AI
-    elif game_mode == "pvp":
-        turn = "player1"  # Player 1 starts first in player vs player mode
-
     while running:
         clock.tick(60)
 
@@ -63,29 +57,24 @@ def main():
             board.draw(surface)
             pygame.display.flip()
 
-            if game_mode == "pvp":
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # Left mouse button
-                        pos = pygame.mouse.get_pos()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse button
+                    pos = pygame.mouse.get_pos()
+                    if game_mode == "pvp":
                         if turn == "player1":
                             if play_vs_player(board, pos):
                                 turn = "player2"  # Switch to player 2's turn
                         else:
                             if play_vs_player(board, pos):
                                 turn = "player1"  # Switch to player 1's turn
-
-            elif game_mode == "pvai":
-                if turn == "player1":
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        if event.button == 1:  # Left mouse button
-                            pos = pygame.mouse.get_pos()
+                    elif game_mode == "pvai":
+                        if turn == "player1":
                             if play_vs_player(board, pos):
                                 turn = "ai"  # Switch to AI's turn
 
-                elif turn == "ai":
-                    # AI logic goes here
-                    play_vs_ai(board)
-                    turn = "player1"  # Switch back to player 1's turn after AI move
+                        elif turn == "ai":
+                            play_vs_ai(board)
+                            turn = "player1"  # Switch back to player 1's turn after AI move
 
     pygame.quit()
 

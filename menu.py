@@ -13,7 +13,7 @@ def draw_menu(surface, font):
     pvp_button = pygame.Rect(Constants.WIDTH // 4, Constants.HEIGHT // 2, Constants.WIDTH // 2, 50)
     pygame.draw.rect(surface, Colors.BUTTON_COLOR, pvp_button)  # Transparent green fill
     pygame.draw.rect(surface, Colors.GREEN, pvp_button, 2)  # Green border
-    pvp_text = font.render("Player vs Player", True, Colors.GREEN)
+    pvp_text = font.render("PvP", True, Colors.GREEN)
     pvp_text_rect = pvp_text.get_rect(center=pvp_button.center)
     surface.blit(pvp_text, pvp_text_rect)
 
@@ -21,7 +21,7 @@ def draw_menu(surface, font):
     pvai_button = pygame.Rect(Constants.WIDTH // 4, Constants.HEIGHT // 2 + 100, Constants.WIDTH // 2, 50)
     pygame.draw.rect(surface, Colors.BUTTON_COLOR, pvai_button)  # Transparent green fill
     pygame.draw.rect(surface, Colors.GREEN, pvai_button, 2)  # Green border
-    pvai_text = font.render("Player vs AI", True, Colors.GREEN)
+    pvai_text = font.render("PvE", True, Colors.GREEN)
     pvai_text_rect = pvai_text.get_rect(center=pvai_button.center)
     surface.blit(pvai_text, pvai_text_rect)
 
