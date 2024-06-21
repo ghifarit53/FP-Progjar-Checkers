@@ -1,20 +1,29 @@
 import pygame
-from ai import get_ai_move
+from constants import Constants, Colors
+from board import Board
 
-def handle_player_turn(board, surface, player_turn):
-    if player_turn:
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                if board.handle_click(pos):
-                    return False  # End of Player turn
-    return True
+def play_vs_player(board, pos):
+    if board.handle_click(pos):
+        return True
+    return False
 
-def handle_ai_turn(board, surface, ai_turn):
-    if ai_turn:
-        ai_move = get_ai_move(board)
-        if ai_move:
-            piece, (row, col) = ai_move
-            board.move(piece, row, col)
-            return False  # End of AI turn
-    return True
+def play_vs_ai(board):
+    # Placeholder AI logic for demonstration
+    # Randomly select a piece and make a valid move
+    import random
+    valid_pieces = []
+    for row in range(Constants.ROWS):
+        for col in range(Constants.COLS):
+            piece = board.board[row][col]
+            if piece != 0 and piece.color == Colors.BLACK:  # Use Colors.BLACK instead of Constants.BLACK
+                valid_pieces.append((row, col))
+    if valid_pieces:
+        piece_to_move = random.choice(valid_pieces)
+        board.handle_click((piece_to_move[1] * Constants.SQUARE_SIZE + Constants.SQUARE_SIZE // 2,
+                            piece_to_move[0] * Constants.SQUARE_SIZE + Constants.SQUARE_SIZE // 2))
+        # Simulate a random valid move for demonstration purposes
+        valid_moves = board.board[piece_to_move[0]][piece_to_move[1]].get_valid_moves(board.board)
+        if valid_moves:
+            move = random.choice(valid_moves)
+            board.handle_click((move[1] * Constants.SQUARE_SIZE + Constants.SQUARE_SIZE // 2,
+                                move[0] * Constants.SQUARE_SIZE + Constants.SQUARE_SIZE // 2))
