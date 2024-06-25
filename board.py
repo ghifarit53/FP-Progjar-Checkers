@@ -75,5 +75,8 @@ class Board:
         end_row, end_col = end_pos
         self.board[end_row][end_col] = self.board[start_row][start_col]
         self.board[start_row][start_col] = 0
-        self.board[end_row][end_col].row = end_row
-        self.board[end_row][end_col].col = end_col
+        self.board[end_row][end_col].move(end_row, end_col)
+
+        # Promote to king if reaching the opposite end
+        if end_row == 0 or end_row == Constants.ROWS - 1:
+            self.board[end_row][end_col].make_king()

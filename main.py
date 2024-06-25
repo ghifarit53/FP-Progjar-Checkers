@@ -1,5 +1,5 @@
 import pygame
-import os  # To handle file paths
+import os
 from constants import Constants, Colors
 from board import Board
 from menu import draw_menu
@@ -13,14 +13,14 @@ def main():
 
     # Load monospace font
     font_path = os.path.join('assets', 'fonts', 'audiowide-mono', 'Audiowide-Mono-Latest.ttf')
-    font = pygame.font.Font(font_path, 23)  # Adjust size as needed
+    font = pygame.font.Font(font_path, 23)
 
     board = Board()
     clock = pygame.time.Clock()
     running = True
     menu_active = True
     game_mode = None
-    turn = "player1"  # Initialize turn tracker
+    turn = "player1"
 
     while running:
         clock.tick(60)
@@ -36,6 +36,7 @@ def main():
                 else:
                     new_height = int(new_width / aspect_ratio)
                 surface = pygame.display.set_mode((new_width, new_height), pygame.RESIZABLE)
+
             if menu_active:
                 draw_menu(surface, font)
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -44,7 +45,7 @@ def main():
                     if pvp_button.collidepoint(pos):
                         menu_active = False
                         game_mode = "pvp"
-                        turn = "player1"  # Set turn to player 1
+                        turn = "player1"
 
             if not menu_active and game_mode == "pvp":
                 surface.fill(Colors.BLACK)
@@ -55,7 +56,7 @@ def main():
                     if event.button == 1:  # Left mouse button
                         pos = pygame.mouse.get_pos()
                         if board.handle_click(pos):
-                            turn = "player2" if turn == "player1" else "player1"  # Switch turns in player vs player mode
+                            turn = "player2" if turn == "player1" else "player1"
 
     pygame.quit()
 
