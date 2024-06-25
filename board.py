@@ -1,3 +1,4 @@
+# board.py
 import pygame
 from constants import Constants, Colors
 from piece import Piece
@@ -16,7 +17,7 @@ class Board:
             for col in range(Constants.COLS):
                 if (row + col) % 2 == 1:
                     if row < 3:
-                        self.board[row].append(Piece(row, col, Colors.LIGHT))  # Add light pieces
+                        self.board[row].append(Piece(row, col, Colors.WHITE))  # Add light pieces
                     elif row > 4:
                         self.board[row].append(Piece(row, col, Colors.BLACK))  # Add black pieces
                     else:

@@ -1,10 +1,11 @@
+# menu.py
 import pygame
 from constants import Constants, Colors
 
 def draw_menu(surface, font):
-    surface.fill(Colors.BLACK)
-    text_color = Colors.WHITE
-    button_color = Colors.GREEN
+    surface.fill(Colors.MENU_BG)
+    text_color = Colors.TEXT_COLOR
+    button_color = Colors.BUTTON_COLOR
 
     title_text = font.render('Checkers', True, text_color)
     pvp_text = font.render('Player vs Player', True, text_color)

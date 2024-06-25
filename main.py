@@ -1,3 +1,4 @@
+# main.py
 import pygame
 import os
 from constants import Constants, Colors
@@ -7,12 +8,12 @@ from menu import draw_menu
 def main():
     pygame.init()
     aspect_ratio = Constants.WIDTH / Constants.HEIGHT
-    min_width, min_height = 600, 600
+    min_width, min_height = 300, 300
     surface = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT), pygame.RESIZABLE)
-    pygame.display.set_caption('Checkers')
+    pygame.display.set_caption('Checkers 101')
 
-    # Load monospace font
-    font_path = os.path.join('assets', 'fonts', 'audiowide-mono', 'Audiowide-Mono-Latest.ttf')
+    # Load font
+    font_path = os.path.join('assets', 'fonts', 'audiowide-mono', 'Audiowide-Mono-301.ttf')
     font = pygame.font.Font(font_path, 23)
 
     board = Board()
