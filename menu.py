@@ -7,8 +7,8 @@ def draw_menu(surface, font):
     text_color = Colors.TEXT_COLOR
     button_color = Colors.BUTTON_COLOR
 
-    title_text = font.render('Checkers', True, text_color)
-    pvp_text = font.render('Player vs Player', True, text_color)
+    title_text = font.render('Checkers 101', True, text_color)
+    pvp_text = font.render(' P v P ', True, text_color)
 
     title_rect = title_text.get_rect(center=(Constants.WIDTH // 2, Constants.HEIGHT // 4))
     pvp_rect = pvp_text.get_rect(center=(Constants.WIDTH // 2, Constants.HEIGHT // 2))

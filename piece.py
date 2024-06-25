@@ -1,77 +1,58 @@
-# piece.py
 import pygame
 from constants import Constants, Colors
 
 class Piece:
-    PADDING = 15
-    OUTLINE = 2
-
     def __init__(self, row, col, color):
         self.row = row
         self.col = col
         self.color = color
-        self.king = False
-        self.x = 0
-        self.y = 0
+        self.is_king = False
+        self.calculate_pos()
 
-    def calculate_position(self, square_size):
-        self.x = self.col * square_size + square_size // 2
-        self.y = self.row * square_size + square_size // 2
-
-    def make_king(self):
-        self.king = True
+    def calculate_pos(self):
+        self.x = Constants.SQUARE_SIZE * self.col + Constants.SQUARE_SIZE // 2
+        self.y = Constants.SQUARE_SIZE * self.row + Constants.SQUARE_SIZE // 2
 
     def draw(self, surface, square_size):
-        self.calculate_position(square_size)
-        radius = max(square_size // 2 - self.PADDING, 8)
-        pygame.draw.circle(surface, Colors.GREEN, (self.x, self.y), radius + self.OUTLINE)  # Draw the outline
-        pygame.draw.circle(surface, self.color, (self.x, self.y), radius)
-        if self.king:
-            pygame.draw.circle(surface, Colors.WHITE, (self.x, self.y), radius // 2)
+        radius = square_size // 2 - 10
+        pygame.draw.circle(surface, Colors.GREEN, (self.x, self.y), radius + 2)  # Draw outer green circle
+        pygame.draw.circle(surface, self.color, (self.x, self.y), radius)  # Draw main piece color circle
+        if self.is_king:
+            crown_img = pygame.image.load('assets/images/crown.png')
+            crown_img = pygame.transform.scale(crown_img, (square_size, square_size))
+            surface.blit(crown_img, (self.x - square_size // 2, self.y - square_size // 2))
+
+
+    def move(self, row, col):
+        self.row = row
+        self.col = col
+        self.calculate_pos()
+
+    def make_king(self):
+        self.is_king = True
 
     def get_valid_moves(self, board):
         valid_moves = []
-        directions = [-1, 1]
-        row = self.row
-        col = self.col
-        forward = 1 if self.color == Colors.BLACK else -1
+        directions = []
+
+        if self.color == Colors.BLACK:
+            directions = [(-1, -1), (-1, 1)]  # Up-left and up-right for black pieces
+        elif self.color == Colors.WHITE:
+            directions = [(1, -1), (1, 1)]  # Down-left and down-right for white pieces
+
+        if self.is_king:
+            directions.extend([(1, -1), (1, 1), (-1, -1), (-1, 1)])  # All diagonal directions for kings
 
         for direction in directions:
-            if self.can_jump(row + forward, col + direction, row + 2 * forward, col + 2 * direction, board):
-                valid_moves.append((row + 2 * forward, col + 2 * direction))
-            elif self.is_valid_move(row + forward, col + direction, board):
-                valid_moves.append((row + forward, col + direction))
+            dir_row, dir_col = direction
+            new_row = self.row + dir_row
+            new_col = self.col + dir_col
 
-        if self.king:
-            for direction in directions:
-                if self.can_jump(row - forward, col + direction, row - 2 * forward, col + 2 * direction, board):
-                    valid_moves.append((row - 2 * forward, col + 2 * direction))
-                elif self.is_valid_move(row - forward, col + direction, board):
-                    valid_moves.append((row - forward, col + direction))
+            if 0 <= new_row < Constants.ROWS and 0 <= new_col < Constants.COLS:
+                if board[new_row][new_col] == 0:
+                    valid_moves.append((new_row, new_col))
+                elif board[new_row][new_col].color != self.color:
+                    # Jump move logic can be added here for capturing opponent's piece
+                    pass
 
         return valid_moves
-
-    def is_valid_move(self, row, col, board):
-        if row < 0 or row >= Constants.ROWS or col < 0 or col >= Constants.COLS:
-            return False
-        if board[row][col] != 0:
-            return False
-        return True
-
-    def can_jump(self, start_row, start_col, end_row, end_col, board):
-        if end_row < 0 or end_row >= Constants.ROWS or end_col < 0 or end_col >= Constants.COLS:
-            return False
-        if board[end_row][end_col] != 0:
-            return False
-        opponent_row = (start_row + end_row) // 2
-        opponent_col = (start_col + end_col) // 2
-        if board[opponent_row][opponent_col] == 0 or board[opponent_row][opponent_col].color == self.color:
-            return False
-        return True
-
-    def move(self, new_row, new_col):
-        self.row = new_row
-        self.col = new_col
-
-    def __repr__(self):
-        return str(self.color)

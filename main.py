@@ -1,4 +1,3 @@
-# main.py
 import pygame
 import os
 from constants import Constants, Colors
@@ -8,12 +7,14 @@ from menu import draw_menu
 def main():
     pygame.init()
     aspect_ratio = Constants.WIDTH / Constants.HEIGHT
-    min_width, min_height = 300, 300
+    min_width, min_height = 600, 600
     surface = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT), pygame.RESIZABLE)
-    pygame.display.set_caption('Checkers 101')
+    pygame.display.set_caption('Checkers')
 
-    # Load font
-    font_path = os.path.join('assets', 'fonts', 'audiowide-mono', 'Audiowide-Mono-301.ttf')
+    # Load monospace font
+    font_path = os.path.join('assets', 'fonts', 'audiowide-mono', 'Audiowide-Mono-Latest.ttf')
+    if not os.path.exists(font_path):
+        raise FileNotFoundError(f"No file '{font_path}' found in working directory '{os.getcwd()}'")
     font = pygame.font.Font(font_path, 23)
 
     board = Board()
@@ -21,7 +22,7 @@ def main():
     running = True
     menu_active = True
     game_mode = None
-    turn = "player1"
+    turn = "player1"  # Player 1 starts with black pieces
 
     while running:
         clock.tick(60)
@@ -46,7 +47,7 @@ def main():
                     if pvp_button.collidepoint(pos):
                         menu_active = False
                         game_mode = "pvp"
-                        turn = "player1"
+                        turn = "player1"  # Player 1 starts the game
 
             if not menu_active and game_mode == "pvp":
                 surface.fill(Colors.BLACK)
@@ -56,8 +57,11 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Left mouse button
                         pos = pygame.mouse.get_pos()
-                        if board.handle_click(pos):
-                            turn = "player2" if turn == "player1" else "player1"
+                        if board.handle_click(pos, turn):  # Pass current player's turn
+                            if turn == "player1":
+                                turn = "player2"  # Switch to Player 2's turn
+                            else:
+                                turn = "player1"  # Switch to Player 1's turn
 
     pygame.quit()
 
