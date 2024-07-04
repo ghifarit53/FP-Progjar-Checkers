@@ -1,7 +1,6 @@
 import pygame
 from constants import Constants
 from board import Board
-from menu import Menu
 
 def main():
     # Initialize Pygame
@@ -11,12 +10,10 @@ def main():
     surface = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption('Checkers')
 
-    # Create the board and menu
+    # Create the board
     board = Board()
-    menu = Menu()
     clock = pygame.time.Clock()
     running = True
-    in_menu = True
 
     while running:
         clock.tick(60)  # Set the frame rate to 60 FPS
@@ -35,26 +32,9 @@ def main():
                     new_height = int(new_width / aspect_ratio)
                 surface = pygame.display.set_mode((new_width, new_height), pygame.RESIZABLE)
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if in_menu:
-                    button_text = menu.get_button(event.pos)
-                    if button_text == "Start Game":
-                        in_menu = False
-                    elif button_text == "Quit":
-                        running = False
-                else:
-                    board.handle_click(event.pos, surface)
 
-            if event.type == pygame.MOUSEMOTION:
-                if in_menu:
-                    menu.update_hover(event.pos)
-
-        if in_menu:
-            menu.draw(surface)
-        else:
-            # Draw the board and update the display
-            board.draw(surface)
-
+        # Draw the board and update the display
+        board.draw(surface)
         pygame.display.flip()
 
     pygame.quit()  # Quit Pygame
