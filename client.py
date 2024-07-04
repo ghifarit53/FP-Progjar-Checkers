@@ -1,34 +1,69 @@
 import pygame
+import socket
+import pickle
+import threading
 from constants import Constants
 from board import Board
 from menu import Menu
 
-def main():
-    # Initialize Pygame
+class CheckersClient:
+    def __init__(self, host='localhost', port=5555):
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client.connect((host, port))
+        self.player_id = None
+        self.receive_thread = threading.Thread(target=self.receive_data)
+        self.receive_thread.start()
+
+    def receive_data(self):
+        while True:
+            try:
+                data = self.client.recv(4096)
+                if not data:
+                    break
+                data = pickle.loads(data)
+                self.handle_data(data)
+            except Exception as e:
+                print(f"Error: {e}")
+                break
+
+    def send_data(self, data):
+        try:
+            self.client.send(pickle.dumps(data))
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def handle_data(self, data):
+        if 'player_id' in data:
+            self.player_id = data['player_id']
+        else:
+            self.game.update_game_state(data)
+
+    def run(self):
+        main(self)
+
+def main(client):
     pygame.init()
-    aspect_ratio = Constants.WIDTH / Constants.HEIGHT  # Aspect ratio (width / height)
+    aspect_ratio = Constants.WIDTH / Constants.HEIGHT
     min_width, min_height = 300, 300
     surface = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption('Checkers')
 
-    # Create the board and menu
     board = Board()
+    client.game = board
     menu = Menu()
     clock = pygame.time.Clock()
     running = True
     in_menu = True
 
     while running:
-        clock.tick(60)  # Set the frame rate to 60 FPS
+        clock.tick(60)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False  # Exit the game loop if the user quits
+                running = False
 
             if event.type == pygame.VIDEORESIZE:
-                # Calculate the new width and height to maintain the aspect ratio
                 new_width = max(event.w, min_width)
                 new_height = max(event.h, min_height)
-                # Adjust dimensions to maintain the aspect ratio
                 if new_width / new_height > aspect_ratio:
                     new_width = int(new_height * aspect_ratio)
                 else:
@@ -43,7 +78,11 @@ def main():
                     elif button_text == "Quit":
                         running = False
                 else:
-                    board.handle_click(event.pos, surface)
+                    result = board.handle_click(event.pos, surface)
+                    if result == "QUIT":
+                        running = False
+                    else:
+                        client.send_data(board.get_game_state())
 
             if event.type == pygame.MOUSEMOTION:
                 if in_menu:
@@ -52,12 +91,12 @@ def main():
         if in_menu:
             menu.draw(surface)
         else:
-            # Draw the board and update the display
             board.draw(surface)
 
         pygame.display.flip()
 
-    pygame.quit()  # Quit Pygame
+    pygame.quit()
 
 if __name__ == '__main__':
-    main()
+    client = CheckersClient()
+    client.run()
