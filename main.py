@@ -1,8 +1,24 @@
 import pygame
 import os
+import socket
+import pickle
 from constants import Constants, Colors
 from board import Board
 from menu import draw_menu
+
+class GameClient:
+    def __init__(self, host, port):
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client.connect((host, port))
+        self.board = None
+        self.turn = None
+
+    def send_move(self, move):
+        self.client.sendall(pickle.dumps(move))
+
+    def receive_update(self):
+        data = self.client.recv(1024)
+        return pickle.loads(data)
 
 def main():
     pygame.init()
@@ -17,12 +33,13 @@ def main():
         raise FileNotFoundError(f"No file '{font_path}' found in working directory '{os.getcwd()}'")
     font = pygame.font.Font(font_path, 23)
 
+    # Connect to server
+    client = GameClient('localhost', 5555)
     board = Board()
     clock = pygame.time.Clock()
     running = True
     menu_active = True
     game_mode = None
-    turn = "player1"  # Player 1 starts with black pieces
 
     while running:
         clock.tick(60)
@@ -47,7 +64,6 @@ def main():
                     if pvp_button.collidepoint(pos):
                         menu_active = False
                         game_mode = "pvp"
-                        turn = "player1"  # Player 1 starts the game
 
             if not menu_active and game_mode == "pvp":
                 surface.fill(Colors.BLACK)
@@ -57,11 +73,14 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Left mouse button
                         pos = pygame.mouse.get_pos()
-                        if board.handle_click(pos, turn):  # Pass current player's turn
-                            if turn == "player1":
-                                turn = "player2"  # Switch to Player 2's turn
-                            else:
-                                turn = "player1"  # Switch to Player 1's turn
+                        if board.handle_click(pos, client.turn):  # Pass current player's turn
+                            client.send_move((board.selected_piece, pos))  # Send move to server
+
+        if not menu_active:
+            board_state, client.turn = client.receive_update()  # Update board and turn from server
+            board.board = board_state
+            board.draw(surface)
+            pygame.display.flip()
 
     pygame.quit()
 
