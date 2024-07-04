@@ -2,32 +2,57 @@ import pygame
 from constants import Constants, Colors
 
 class Piece:
-    PADDING = 15  # Padding around the piece to make it smaller than the square
-    OUTLINE = 2  # Outline thickness of the piece
-
     def __init__(self, row, col, color):
         self.row = row
         self.col = col
         self.color = color
-        self.king = False  # Initially, the piece is not a king
-        self.x = 0
-        self.y = 0
+        self.is_king = False
+        self.calculate_pos()
 
-    def calculate_position(self, square_size):
-        self.x = self.col * square_size + square_size // 2
-        self.y = self.row * square_size + square_size // 2
-
-    def make_king(self):
-        # Promote the piece to a king
-        self.king = True
+    def calculate_pos(self):
+        self.x = Constants.SQUARE_SIZE * self.col + Constants.SQUARE_SIZE // 2
+        self.y = Constants.SQUARE_SIZE * self.row + Constants.SQUARE_SIZE // 2
 
     def draw(self, surface, square_size):
-        self.calculate_position(square_size)
-        radius = max(square_size // 2 - self.PADDING, 8)
-        pygame.draw.circle(surface, Colors.HIGHLIGHT, (self.x, self.y), radius + self.OUTLINE)  # Draw the outline
-        pygame.draw.circle(surface, self.color, (self.x, self.y), radius)  # Draw the piece
-        if self.king:
-            pygame.draw.circle(surface, Colors.WHITE, (self.x, self.y), radius // 2)  # Draw a smaller circle for kings
+        radius = square_size // 2 - 10
+        pygame.draw.circle(surface, Colors.GREEN, (self.x, self.y), radius + 2)  # Draw outer green circle
+        pygame.draw.circle(surface, self.color, (self.x, self.y), radius)  # Draw main piece color circle
+        if self.is_king:
+            crown_img = pygame.image.load('assets/images/crown.png')
+            crown_img = pygame.transform.scale(crown_img, (square_size, square_size))
+            surface.blit(crown_img, (self.x - square_size // 2, self.y - square_size // 2))
 
-    def __repr__(self):
-        return str(self.color)  # Return the color of the piece as its string representation
+
+    def move(self, row, col):
+        self.row = row
+        self.col = col
+        self.calculate_pos()
+
+    def make_king(self):
+        self.is_king = True
+
+    def get_valid_moves(self, board):
+        valid_moves = []
+        directions = []
+
+        if self.color == Colors.BLACK:
+            directions = [(-1, -1), (-1, 1)]  # Up-left and up-right for black pieces
+        elif self.color == Colors.WHITE:
+            directions = [(1, -1), (1, 1)]  # Down-left and down-right for white pieces
+
+        if self.is_king:
+            directions.extend([(1, -1), (1, 1), (-1, -1), (-1, 1)])  # All diagonal directions for kings
+
+        for direction in directions:
+            dir_row, dir_col = direction
+            new_row = self.row + dir_row
+            new_col = self.col + dir_col
+
+            if 0 <= new_row < Constants.ROWS and 0 <= new_col < Constants.COLS:
+                if board[new_row][new_col] == 0:
+                    valid_moves.append((new_row, new_col))
+                elif board[new_row][new_col].color != self.color:
+                    # Jump move logic can be added here for capturing opponent's piece
+                    pass
+
+        return valid_moves
