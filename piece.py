@@ -15,12 +15,16 @@ class Piece:
 
     def draw(self, surface, square_size):
         radius = square_size // 2 - 10
-        pygame.draw.circle(surface, Colors.GREEN, (self.x, self.y), radius + 2)
-        pygame.draw.circle(surface, self.color, (self.x, self.y), radius)
         if self.is_king:
-            crown_img = pygame.image.load('assets/images/crown.png')
-            crown_img = pygame.transform.scale(crown_img, (square_size, square_size))
-            surface.blit(crown_img, (self.x - square_size // 2, self.y - square_size // 2))
+            # Draw white border for king
+            pygame.draw.circle(surface, Colors.WHITE, (self.x, self.y), radius + 2)
+            # Draw bright blue interior for king
+            pygame.draw.circle(surface, Colors.BRIGHT_BLUE, (self.x, self.y), radius)
+        else:
+            # Draw green border for regular piece
+            pygame.draw.circle(surface, Colors.GREEN, (self.x, self.y), radius + 2)
+            # Draw main piece color
+            pygame.draw.circle(surface, self.color, (self.x, self.y), radius)
 
     def move(self, row, col):
         self.row = row
