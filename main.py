@@ -10,15 +10,23 @@ class GameClient:
     def __init__(self, host, port):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.connect((host, port))
-        self.board = None
-        self.turn = None
+        self.board = Board()
+        self.player_id = None
+        self.current_player = None
+
+    def start(self):
+        data = self.client.recv(1024)
+        self.player_id = pickle.loads(data)
+        print(f"You are Player {self.player_id + 1}")
 
     def send_move(self, move):
         self.client.sendall(pickle.dumps(move))
 
     def receive_update(self):
         data = self.client.recv(1024)
-        return pickle.loads(data)
+        board_state, self.current_player = pickle.loads(data)
+        self.board.board = board_state
+        return self.board, self.current_player
 
 def main():
     pygame.init()
@@ -27,15 +35,14 @@ def main():
     surface = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption('Checkers')
 
-    # Load monospace font
     font_path = os.path.join('assets', 'fonts', 'audiowide-mono', 'Audiowide-Mono-Latest.ttf')
     if not os.path.exists(font_path):
         raise FileNotFoundError(f"No file '{font_path}' found in working directory '{os.getcwd()}'")
     font = pygame.font.Font(font_path, 23)
 
-    # Connect to server
     client = GameClient('localhost', 5555)
-    board = Board()
+    client.start()
+
     clock = pygame.time.Clock()
     running = True
     menu_active = True
@@ -43,7 +50,6 @@ def main():
 
     while running:
         clock.tick(60)
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -55,7 +61,6 @@ def main():
                 else:
                     new_height = int(new_width / aspect_ratio)
                 surface = pygame.display.set_mode((new_width, new_height), pygame.RESIZABLE)
-
             if menu_active:
                 draw_menu(surface, font)
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -64,22 +69,19 @@ def main():
                     if pvp_button.collidepoint(pos):
                         menu_active = False
                         game_mode = "pvp"
-
             if not menu_active and game_mode == "pvp":
                 surface.fill(Colors.BLACK)
-                board.draw(surface)
+                client.board.draw(surface)
                 pygame.display.flip()
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and client.current_player == client.player_id:
                     if event.button == 1:  # Left mouse button
                         pos = pygame.mouse.get_pos()
-                        if board.handle_click(pos, client.turn):  # Pass current player's turn
-                            client.send_move((board.selected_piece, pos))  # Send move to server
+                        if client.board.handle_click(pos, "player1" if client.player_id == 0 else "player2"):
+                            client.send_move((client.board.selected_piece, pos))
 
         if not menu_active:
-            board_state, client.turn = client.receive_update()  # Update board and turn from server
-            board.board = board_state
-            board.draw(surface)
+            client.board, client.current_player = client.receive_update()
+            client.board.draw(surface)
             pygame.display.flip()
 
     pygame.quit()
