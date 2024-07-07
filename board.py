@@ -4,26 +4,25 @@ from piece import Piece
 
 class Board:
     def __init__(self):
-        self.board = []  # 2D list to store pieces
-        self.selected_piece = None  # Track selected piece
-        self.valid_moves = []  # Track valid moves for the selected piece
+        self.board = []
+        self.selected_piece = None
+        self.valid_moves = []
         self.setup_board()
-        self.turn = "player1"  # Initialize turn (player1 starts with black)
+        self.turn = "player1"
 
     def setup_board(self):
-        # Set up the initial board configuration with pieces
         for row in range(Constants.ROWS):
             self.board.append([])
             for col in range(Constants.COLS):
                 if (row + col) % 2 == 1:
                     if row < 3:
-                        self.board[row].append(Piece(row, col, Colors.WHITE))  # Add white pieces for Player 1
+                        self.board[row].append(Piece(row, col, Colors.WHITE))
                     elif row > 4:
-                        self.board[row].append(Piece(row, col, Colors.BLACK))  # Add black pieces for Player 2
+                        self.board[row].append(Piece(row, col, Colors.BLACK))
                     else:
-                        self.board[row].append(0)  # Empty square
+                        self.board[row].append(0)
                 else:
-                    self.board[row].append(0)  # Empty square
+                    self.board[row].append(0)
 
     def draw(self, surface):
         width, height = surface.get_size()
@@ -90,6 +89,10 @@ class Board:
         self.board[start_row][start_col] = 0
         self.board[end_row][end_col].move(end_row, end_col)
 
-        # Promote to king if reaching the opposite end
         if end_row == 0 or end_row == Constants.ROWS - 1:
             self.board[end_row][end_col].make_king()
+
+        if abs(start_row - end_row) == 2:
+            captured_row = (start_row + end_row) // 2
+            captured_col = (start_col + end_col) // 2
+            self.board[captured_row][captured_col] = 0

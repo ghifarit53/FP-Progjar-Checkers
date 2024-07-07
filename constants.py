@@ -6,6 +6,7 @@ class Constants:
     SQUARE_SIZE = WIDTH // COLS
 
 class Colors:
+    BRIGHT_BLUE = (0, 191, 255)  # Deep Sky Blue
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
     LIGHT = (210, 180, 140)

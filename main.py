@@ -30,10 +30,8 @@ class GameClient:
 
 def main():
     pygame.init()
-    aspect_ratio = Constants.WIDTH / Constants.HEIGHT
-    min_width, min_height = 600, 600
-    surface = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT), pygame.RESIZABLE)
-    pygame.display.set_caption('Checkers')
+    surface = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT))
+    pygame.display.set_caption('Checkers 101')
 
     font_path = os.path.join('assets', 'fonts', 'audiowide-mono', 'Audiowide-Mono-Latest.ttf')
     if not os.path.exists(font_path):
@@ -53,20 +51,12 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.VIDEORESIZE:
-                new_width = max(event.w, min_width)
-                new_height = max(event.h, min_height)
-                if new_width / new_height > aspect_ratio:
-                    new_width = int(new_height * aspect_ratio)
-                else:
-                    new_height = int(new_width / aspect_ratio)
-                surface = pygame.display.set_mode((new_width, new_height), pygame.RESIZABLE)
             if menu_active:
                 draw_menu(surface, font)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
-                    pvp_button = pygame.Rect(Constants.WIDTH // 4, Constants.HEIGHT // 2, Constants.WIDTH // 2, 50)
-                    if pvp_button.collidepoint(pos):
+                    button_rect = pygame.Rect((Constants.WIDTH - (font.size('Checkers 101')[0] + 40)) // 2, Constants.HEIGHT // 2, font.size('Checkers 101')[0] + 40, font.size(' P v P ')[1] + 20)
+                    if button_rect.collidepoint(pos):
                         menu_active = False
                         game_mode = "pvp"
             if not menu_active and game_mode == "pvp":
