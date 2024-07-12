@@ -26,7 +26,7 @@ class Piece:
         pygame.draw.circle(win, Colors.GREY, (self.x, self.y), radius + self.OUTLINE)
         pygame.draw.circle(win, self.color, (self.x, self.y), radius)
         if self.king:
-            crown = pygame.image.load('image/crown.png')
+            crown = pygame.image.load('image/crown.jpeg')
             crown = pygame.transform.scale(crown, (44, 25))
             win.blit(crown, (self.x - crown.get_width() // 2, self.y - crown.get_height() // 2))
 
