@@ -1,4 +1,3 @@
-# board.py
 import pygame
 from constants import Constants, Colors
 from piece import Piece
@@ -12,7 +11,6 @@ class Board:
         self.selected_piece = None
         self.valid_moves = {}
         self.turn = Colors.SADDLEBROWN
-        self.ready = False
 
     def create_board(self):
         for row in range(Constants.ROWS):
@@ -171,12 +169,12 @@ class Board:
                 if skipped:
                     self.remove(skipped)
                 self.selected_piece = None
-                self.valid_moves = {}
+                self.valid_moves = []
                 return True
             else:
                 print(f"Invalid move to {(row, col)}")
                 self.selected_piece = None
-                self.valid_moves = {}
+                self.valid_moves = []
         else:
             piece = self.get_piece(row, col)
             if piece != 0 and piece.color == current_turn:

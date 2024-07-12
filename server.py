@@ -1,75 +1,59 @@
-# server.py
 import socket
+import threading
 import pickle
-from _thread import start_new_thread
+from constants import Colors
 from board import Board
 
-server = "localhost"
-port = 5555
+class GameServer:
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.clients = []
+        self.board = Board()
+        self.turn = Colors.SADDLEBROWN
+        self.lock = threading.Lock()
+        self.player_count = 0
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def handle_client(self, conn, addr):
+        self.lock.acquire()
+        player_number = self.player_count
+        self.player_count += 1
+        self.lock.release()
 
-try:
-    s.bind((server, port))
-except socket.error as e:
-    str(e)
+        print(f"New connection from {addr} as Player {player_number + 1}")
+        conn.send(pickle.dumps(player_number))
+        self.clients.append((conn, player_number))
 
-s.listen(2)
-print("Waiting for a connection, Server Started")
-
-connected = set()
-games = {}
-id_count = 0
-
-def threaded_client(conn, player, game_id):
-    global id_count
-    conn.send(pickle.dumps((game_id, player)))
-    reply = ""
-    while True:
-        try:
-            data = pickle.loads(conn.recv(4096))
-            if game_id in games:
-                game = games[game_id]
-
+        while True:
+            try:
+                data = conn.recv(4096)
                 if not data:
                     break
-                else:
-                    game = data
 
-                games[game_id] = game
+                move = pickle.loads(data)
+                with self.lock:
+                    if self.board.handle_click(move, self.turn):
+                        self.turn = Colors.WHITE if self.turn == Colors.SADDLEBROWN else Colors.SADDLEBROWN
+                        for client, _ in self.clients:
+                            client.sendall(pickle.dumps((self.board, self.turn)))
 
-                if game.winner():
-                    print(f"Game {game_id} has a winner: {game.winner()}")
-                
-                reply = game
-                conn.sendall(pickle.dumps(reply))
-            else:
+            except Exception as e:
+                print(f"Error handling client {addr}: {e}")
                 break
-        except Exception as e:
-            print(e)
-            break
 
-    print("Lost connection")
-    try:
-        del games[game_id]
-        print("Closing Game", game_id)
-    except:
-        pass
-    id_count -= 1
-    conn.close()
+        conn.close()
+        self.clients.remove((conn, player_number))
 
-while True:
-    conn, addr = s.accept()
-    print("Connected to:", addr)
+    def start(self):
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.bind((self.host, self.port))
+        server.listen(2)
+        print("Server started, waiting for connections...")
 
-    id_count += 1
-    player = 0
-    game_id = (id_count - 1) // 2
-    if id_count % 2 == 1:
-        games[game_id] = Board()
-        print("Creating a new game...")
-    else:
-        games[game_id].ready = True
-        player = 1
+        while True:
+            conn, addr = server.accept()
+            threading.Thread(target=self.handle_client, args=(conn, addr)).start()
 
-    start_new_thread(threaded_client, (conn, player, game_id))
+if __name__ == "__main__":
+    server = GameServer('localhost', 5555)
+    server.start()
