@@ -1,53 +1,73 @@
 import socket
 import threading
-from board import Board
 import pickle
 
-class CheckersServer:
-    def __init__(self, host='localhost', port=5555):
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.bind((host, port))
-        self.server.listen(2)
-        self.board = Board()
+class GameServer:
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
         self.clients = []
+        self.board = self.initialize_board()
+        self.turn = "player1"
 
-    def handle_client(self, conn, player):
-        conn.send(pickle.dumps(self.board))
+    def initialize_board(self):
+        board = []
+        for row in range(8):
+            board.append([0] * 8)
+        for row in range(3):
+            for col in range(8):
+                if (row + col) % 2 == 1:
+                    board[row][col] = "W"  # White pieces for Player 1
+        for row in range(5, 8):
+            for col in range(8):
+                if (row + col) % 2 == 1:
+                    board[row][col] = "B"  # Black pieces for Player 2
+        return board
+
+    def handle_client(self, conn, addr):
+        print(f"New connection from {addr}")
+        self.clients.append(conn)
+
         while True:
             try:
-                data = conn.recv(2048)
+                data = conn.recv(1024)
                 if not data:
                     break
 
-                board = pickle.loads(data)
-                self.board = board
-                self.broadcast(board, conn)
+                move = pickle.loads(data)
+                self.process_move(move)
+
+                for client in self.clients:
+                    client.sendall(pickle.dumps(self.board))
+
             except:
                 break
 
         conn.close()
         self.clients.remove(conn)
 
-    def broadcast(self, board, conn):
-        for client in self.clients:
-            if client != conn:
-                try:
-                    client.send(pickle.dumps(board))
-                except:
-                    client.close()
-                    self.clients.remove(client)
+    def process_move(self, move):
+        start_pos, end_pos = move
+        start_row, start_col = start_pos
+        end_row, end_col = end_pos
+        self.board[end_row][end_col] = self.board[start_row][start_col]
+        self.board[start_row][start_col] = 0
 
-    def run(self):
-        print('Server started...')
+        if self.turn == "player1":
+            self.turn = "player2"
+        else:
+            self.turn = "player1"
+
+    def start(self):
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.bind((self.host, self.port))
+        server.listen(2)
+        print("Server started, waiting for connections...")
+
         while True:
-            conn, addr = self.server.accept()
-            self.clients.append(conn)
-            print(f'Connected by {addr}')
-
-            player = len(self.clients)
-            thread = threading.Thread(target=self.handle_client, args=(conn, player))
-            thread.start()
+            conn, addr = server.accept()
+            threading.Thread(target=self.handle_client, args=(conn, addr)).start()
 
 if __name__ == "__main__":
-    server = CheckersServer()
-    server.run()
+    server = GameServer('localhost', 5555)
+    server.start()

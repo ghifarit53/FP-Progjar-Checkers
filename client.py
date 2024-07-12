@@ -1,68 +1,75 @@
 import pygame
-import socket
-import pickle
-import threading
-from constants import Constants, Colors
 from board import Board
+from constants import Colors, Constants
 
-class CheckersClient:
-    def __init__(self, host='localhost', port=5555):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client.connect((host, port))
-        self.board = Board()
-        self.turn = Colors.LIGHT_BROWN
-        self.running = True
+FPS = 60
 
-    def receive_data(self):
-        while self.running:
-            try:
-                data = self.client.recv(2048)
-                if not data:
-                    break
-                self.board = pickle.loads(data)
-            except:
-                break
+def get_row_col_from_mouse(pos):
+    x, y = pos
+    row = y // Constants.SQUARE_SIZE
+    col = x // Constants.SQUARE_SIZE
+    return row, col
 
-    def send_data(self, board):
-        self.client.send(pickle.dumps(board))
+def draw_menu(win):
+    win.fill(Colors.BLACK)
+    font = pygame.font.Font(None, 74)
+    text = font.render('Play Game', True, Colors.WHITE)
+    text_rect = text.get_rect(center=(Constants.WIDTH // 2, Constants.HEIGHT // 2))
+    pygame.draw.rect(win, Colors.BLUE, text_rect.inflate(20, 20))
+    win.blit(text, text_rect)
+    pygame.display.flip()
+    return text_rect
 
-    def main(self):
-        pygame.init()
-        aspect_ratio = Constants.WIDTH / Constants.HEIGHT
-        min_width, min_height = 300, 300
-        surface = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT), pygame.RESIZABLE)
-        pygame.display.set_caption('Checkers')
-        clock = pygame.time.Clock()
+def display_winner(win, winner):
+    font = pygame.font.Font(None, 74)
+    text = font.render(f'The winner is {winner}', True, Colors.WHITE)
+    text_rect = text.get_rect(center=(Constants.WIDTH // 2, Constants.HEIGHT // 2))
+    pygame.draw.rect(win, Colors.BLACK, text_rect.inflate(20, 20))
+    win.blit(text, text_rect)
+    pygame.display.flip()
+    pygame.time.wait(3000)
 
-        receive_thread = threading.Thread(target=self.receive_data)
-        receive_thread.start()
+def main():
+    pygame.init()
+    WIN = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT))
+    pygame.display.set_caption('Checkers')
 
-        while self.running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.turn == Colors.LIGHT_BROWN:  # Update turn as needed
-                        x, y = pygame.mouse.get_pos()
-                        row, col = y // Constants.SQUARE_SIZE, x // Constants.SQUARE_SIZE
-                        if self.board.select_piece(row, col):
-                            self.send_data(self.board)
-                elif event.type == pygame.VIDEORESIZE:
-                    new_width = max(event.w, min_width)
-                    new_height = max(event.h, min_height)
-                    if new_width / new_height > aspect_ratio:
-                        new_width = int(new_height * aspect_ratio)
-                    else:
-                        new_height = int(new_width / aspect_ratio)
-                    surface = pygame.display.set_mode((new_width, new_height), pygame.RESIZABLE)
+    running = True
+    in_menu = True
+    board = None
+    winner = None
 
-            self.board.draw(surface)
-            pygame.display.flip()
-            clock.tick(60)
+    while running:
+        if in_menu:
+            text_rect = draw_menu(WIN)
 
-        pygame.quit()
-        self.client.close()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-if __name__ == "__main__":
-    client = CheckersClient()
-    client.main()
+            if in_menu and event.type == pygame.MOUSEBUTTONDOWN:
+                if text_rect.collidepoint(event.pos):
+                    board = Board()
+                    in_menu = False
+
+            if not in_menu and event.type == pygame.MOUSEBUTTONDOWN and not winner:
+                pos = pygame.mouse.get_pos()
+                row, col = get_row_col_from_mouse(pos)
+                if board:
+                    if board.handle_click(pos, board.turn):
+                        board.turn = Colors.WHITE if board.turn == Colors.SADDLEBROWN else Colors.SADDLEBROWN
+
+            if not in_menu and board and not winner:
+                WIN.fill(Colors.BLACK)
+                board.draw(WIN)
+                winner = board.winner()
+                pygame.display.flip()
+
+        if winner:
+            display_winner(WIN, 'Brown' if winner == Colors.SADDLEBROWN else 'White')
+            running = False
+
+    pygame.quit()
+
+if __name__ == '__main__':
+    main()

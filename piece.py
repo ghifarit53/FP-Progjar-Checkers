@@ -1,40 +1,39 @@
-# piece.py
-
 import pygame
-from constants import Constants, Colors
+from constants import Colors, Constants
 
 class Piece:
-    PADDING = 15  
-    OUTLINE = 2  
+    PADDING = 15
+    OUTLINE = 2
 
     def __init__(self, row, col, color):
         self.row = row
         self.col = col
         self.color = color
-        self.king = False 
+        self.king = False
         self.x = 0
         self.y = 0
-        self.calculate_position()
+        self.calc_pos()
 
-    def calculate_position(self, square_size=Constants.SQUARE_SIZE):
-        self.x = self.col * square_size + square_size // 2
-        self.y = self.row * square_size + square_size // 2
+    def calc_pos(self):
+        self.x = Constants.SQUARE_SIZE * self.col + Constants.SQUARE_SIZE // 2
+        self.y = Constants.SQUARE_SIZE * self.row + Constants.SQUARE_SIZE // 2
 
     def make_king(self):
         self.king = True
 
+    def draw(self, win):
+        radius = Constants.SQUARE_SIZE // 2 - self.PADDING
+        pygame.draw.circle(win, Colors.GREY, (self.x, self.y), radius + self.OUTLINE)
+        pygame.draw.circle(win, self.color, (self.x, self.y), radius)
+        if self.king:
+            crown = pygame.image.load('image/crown.png')
+            crown = pygame.transform.scale(crown, (44, 25))
+            win.blit(crown, (self.x - crown.get_width() // 2, self.y - crown.get_height() // 2))
+
     def move(self, row, col):
         self.row = row
         self.col = col
-        self.calculate_position()
-
-    def draw(self, surface, square_size):
-        self.calculate_position(square_size)
-        radius = max(square_size // 2 - self.PADDING, 8)
-        pygame.draw.circle(surface, Colors.HIGHLIGHT, (self.x, self.y), radius + self.OUTLINE)  
-        pygame.draw.circle(surface, self.color, (self.x, self.y), radius) 
-        if self.king:
-            pygame.draw.circle(surface, Colors.WHITE, (self.x, self.y), radius // 2)  
+        self.calc_pos()
 
     def __repr__(self):
-        return str(self.color)  
+        return str(self.color)
