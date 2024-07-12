@@ -38,8 +38,7 @@ class Network:
         self.server = "localhost"
         self.port = 5555
         self.addr = (self.server, self.port)
-        self.game_id, self.player = self.connect()
-        self.board = self.receive()
+        self.board = self.connect()
 
     def connect(self):
         self.client.connect(self.addr)
@@ -48,12 +47,6 @@ class Network:
     def send(self, data):
         try:
             self.client.send(pickle.dumps(data))
-            return self.receive()
-        except socket.error as e:
-            print(e)
-
-    def receive(self):
-        try:
             return pickle.loads(self.client.recv(4096))
         except socket.error as e:
             print(e)
