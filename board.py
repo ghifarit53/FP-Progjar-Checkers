@@ -1,3 +1,4 @@
+# board.py
 import pygame
 from constants import Constants, Colors
 from piece import Piece
@@ -11,6 +12,7 @@ class Board:
         self.selected_piece = None
         self.valid_moves = {}
         self.turn = Colors.SADDLEBROWN
+        self.ready = False
 
     def create_board(self):
         for row in range(Constants.ROWS):

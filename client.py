@@ -1,4 +1,7 @@
+# client.py
 import pygame
+import socket
+import pickle
 from board import Board
 from constants import Colors, Constants
 
@@ -29,6 +32,25 @@ def display_winner(win, winner):
     pygame.display.flip()
     pygame.time.wait(3000)
 
+class Network:
+    def __init__(self):
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server = "localhost"
+        self.port = 5555
+        self.addr = (self.server, self.port)
+        self.board = self.connect()
+
+    def connect(self):
+        self.client.connect(self.addr)
+        return pickle.loads(self.client.recv(4096))
+
+    def send(self, data):
+        try:
+            self.client.send(pickle.dumps(data))
+            return pickle.loads(self.client.recv(4096))
+        except socket.error as e:
+            print(e)
+
 def main():
     pygame.init()
     WIN = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT))
@@ -36,7 +58,9 @@ def main():
 
     running = True
     in_menu = True
-    board = None
+    n = Network()
+    board = n.board
+    clock = pygame.time.Clock()
     winner = None
 
     while running:
@@ -49,8 +73,8 @@ def main():
 
             if in_menu and event.type == pygame.MOUSEBUTTONDOWN:
                 if text_rect.collidepoint(event.pos):
-                    board = Board()
                     in_menu = False
+                    print("Starting the game...")
 
             if not in_menu and event.type == pygame.MOUSEBUTTONDOWN and not winner:
                 pos = pygame.mouse.get_pos()
@@ -58,6 +82,7 @@ def main():
                 if board:
                     if board.handle_click(pos, board.turn):
                         board.turn = Colors.WHITE if board.turn == Colors.SADDLEBROWN else Colors.SADDLEBROWN
+                        n.send(board)
 
             if not in_menu and board and not winner:
                 WIN.fill(Colors.BLACK)
@@ -65,9 +90,14 @@ def main():
                 winner = board.winner()
                 pygame.display.flip()
 
+                board = n.send(board)
+                winner = board.winner()
+
         if winner:
             display_winner(WIN, 'Brown' if winner == Colors.SADDLEBROWN else 'White')
             running = False
+
+        clock.tick(FPS)
 
     pygame.quit()
 
