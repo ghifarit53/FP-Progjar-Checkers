@@ -38,7 +38,8 @@ class Network:
         self.server = "localhost"
         self.port = 5555
         self.addr = (self.server, self.port)
-        self.board = self.connect()
+        self.game_id, self.player = self.connect()
+        self.board = self.receive()
 
     def connect(self):
         self.client.connect(self.addr)
@@ -47,6 +48,12 @@ class Network:
     def send(self, data):
         try:
             self.client.send(pickle.dumps(data))
+            return self.receive()
+        except socket.error as e:
+            print(e)
+
+    def receive(self):
+        try:
             return pickle.loads(self.client.recv(4096))
         except socket.error as e:
             print(e)
@@ -80,18 +87,18 @@ def main():
                 pos = pygame.mouse.get_pos()
                 row, col = get_row_col_from_mouse(pos)
                 if board:
-                    if board.handle_click(pos, board.turn):
-                        board.turn = Colors.WHITE if board.turn == Colors.SADDLEBROWN else Colors.SADDLEBROWN
-                        n.send(board)
+                    if board.turn == (Colors.SADDLEBROWN if n.player == 1 else Colors.WHITE):
+                        if board.handle_click(pos, board.turn):
+                            board.turn = Colors.WHITE if board.turn == Colors.SADDLEBROWN else Colors.SADDLEBROWN
+                            board = n.send(board)
+                            print("Sent board state to server")
 
-            if not in_menu and board and not winner:
-                WIN.fill(Colors.BLACK)
-                board.draw(WIN)
-                winner = board.winner()
-                pygame.display.flip()
-
-                board = n.send(board)
-                winner = board.winner()
+        if not in_menu and board:
+            WIN.fill(Colors.BLACK)
+            board.draw(WIN)
+            pygame.display.flip()
+            board = n.receive()
+            winner = board.winner()
 
         if winner:
             display_winner(WIN, 'Brown' if winner == Colors.SADDLEBROWN else 'White')
